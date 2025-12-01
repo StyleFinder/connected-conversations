@@ -218,19 +218,25 @@ export default function CardsPage() {
             // Spinning animation
             <div
               key={animationKey}
-              className="relative z-10 slot-machine-spin"
+              className="relative z-10"
+              style={{
+                animation: 'slotSpin 3s cubic-bezier(0.33, 0.0, 0.2, 1) forwards',
+              }}
             >
               {spinningQuestions.map((q, idx) => (
                 <div
                   key={`spin-${idx}`}
-                  className="h-[380px] flex items-center justify-center p-8 md:p-12 border-b-2 border-purple-200"
+                  className="h-[380px] flex items-center justify-center p-8 md:p-12"
+                  style={{
+                    backgroundColor: idx % 2 === 0 ? '#fef3c7' : '#ddd6fe',
+                  }}
                 >
                   <div className="text-center">
-                    <div className="text-xs text-purple-500 mb-2">Question {idx + 1}</div>
+                    <div className="text-2xl font-bold text-purple-600 mb-4">#{idx + 1}</div>
                     <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                       <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                     </svg>
-                    <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
+                    <p className="text-xl md:text-2xl text-gray-800 leading-relaxed font-medium">
                       {q.text}
                     </p>
                   </div>
@@ -329,7 +335,7 @@ export default function CardsPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes gradient-xy {
           0%, 100% {
             background-position: 0% 50%;
