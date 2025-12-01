@@ -12,6 +12,8 @@ export default function CardsPage() {
   const [error, setError] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [spinOffset, setSpinOffset] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -70,8 +72,32 @@ export default function CardsPage() {
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsCompleted(false);
+      setIsSpinning(true);
+
+      const startOffset = currentIndex * 380; // Current position
+      const targetOffset = (currentIndex + 1) * 380; // Next question position
+      const totalDistance = targetOffset - startOffset + (380 * 8); // Add extra spins for effect
+
+      let traveled = 0;
+      let velocity = 50; // Start fast
+      const minVelocity = 0.5;
+      const deceleration = 0.93; // Deceleration factor
+
+      const spinInterval = setInterval(() => {
+        traveled += velocity;
+        setSpinOffset(startOffset + traveled);
+
+        velocity *= deceleration;
+
+        if (velocity < minVelocity) {
+          clearInterval(spinInterval);
+          // Settle on the final question
+          setCurrentIndex(currentIndex + 1);
+          setIsCompleted(false);
+          setIsSpinning(false);
+          setSpinOffset((currentIndex + 1) * 380);
+        }
+      }, 16); // ~60fps
     }
   };
 
@@ -172,17 +198,32 @@ export default function CardsPage() {
           </span>
         </div>
 
-        {/* Question Card with flip animation */}
-        <div className="perspective-1000 mb-6" key={currentIndex}>
-          <div className="backdrop-blur-xl bg-white/95 rounded-3xl shadow-2xl p-8 md:p-12 min-h-[320px] md:min-h-[380px] flex items-center justify-center border border-white/20 animate-card-flip">
-            <div className="text-center">
-              <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-              </svg>
-              <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
-                {currentQuestion?.text}
-              </p>
-            </div>
+        {/* Question Card with slot machine spin animation */}
+        <div className="mb-6 overflow-hidden relative rounded-3xl" style={{ height: '380px' }}>
+          <div className="backdrop-blur-xl bg-white/95 shadow-2xl border border-white/20 h-full absolute inset-0"></div>
+          <div
+            className="relative z-10"
+            style={{
+              transform: `translateY(-${spinOffset}px)`,
+              transition: isSpinning ? 'none' : 'transform 0.3s ease-out',
+            }}
+          >
+            {/* Create a seamless loop of questions */}
+            {[...questions, ...questions, ...questions].map((q, idx) => (
+              <div
+                key={`spin-${idx}`}
+                className="h-[380px] flex items-center justify-center p-8 md:p-12"
+              >
+                <div className="text-center">
+                  <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                  </svg>
+                  <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
+                    {q.text}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -318,6 +359,19 @@ export default function CardsPage() {
           25% { transform: translateX(-10px); }
           75% { transform: translateX(10px); }
         }
+        @keyframes settle {
+          0% {
+            opacity: 0.7;
+            transform: scale(0.98);
+          }
+          50% {
+            transform: scale(1.02);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
         .animate-gradient-xy {
           animation: gradient-xy 15s ease infinite;
         }
@@ -338,6 +392,9 @@ export default function CardsPage() {
         }
         .animate-shake {
           animation: shake 0.4s ease-in-out;
+        }
+        .animate-settle {
+          animation: settle 0.3s ease-out;
         }
         .perspective-1000 {
           perspective: 1000px;
