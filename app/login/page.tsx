@@ -36,7 +36,7 @@ export default function LoginPage() {
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <h1 className="text-[#003366] font-bold" style={{ fontSize: '32px', marginBottom: '8px' }}>
-              Connected Conversations
+              Connected Conversations for Jim and Michele
             </h1>
             <p className="text-[#6b7280]" style={{ fontSize: '14px' }}>
               Sign in to start meaningful conversations
