@@ -6,6 +6,8 @@ import { getIncompleteQuestions, setQuestionCompletion } from '@/lib/ccService';
 import { QuestionWithCategory } from '@/lib/types';
 
 export default function CardsPage() {
+  console.log('🔥 CardsPage component loaded - SLOT MACHINE VERSION');
+
   const [questions, setQuestions] = useState<QuestionWithCategory[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -327,7 +329,7 @@ export default function CardsPage() {
             disabled={currentIndex === questions.length - 1}
             className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none flex items-center justify-center gap-2"
           >
-            Next
+            Next 🎰
             <svg className="w-5 h-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M9 5l7 7-7 7"></path>
             </svg>
