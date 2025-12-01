@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Connected Conversations
 
-## Getting Started
+A mobile-first card-style conversation app built with Next.js 14, TypeScript, and Supabase. Display categorized questions one at a time, track completion status, and navigate through your conversation deck.
 
-First, run the development server:
+## Features
+
+- Email/password authentication (single user)
+- Category selection with toggles
+- Card-based question display with shuffle
+- Mark questions as completed (hides from deck)
+- Previous/Next navigation between cards
+- Mobile-first responsive design
+- Supabase backend with RLS
+
+## Tech Stack
+
+- **Framework**: Next.js 14+ with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL with RLS)
+- **Auth**: Supabase Auth (email/password)
+
+## Database Schema
+
+The app uses an existing Supabase project with the `connected_conversations` schema:
+
+- **categories**: Category definitions with sort order
+- **questions**: Questions linked to categories
+- **question_completions**: User completion tracking (unique per user/question)
+
+## Local Development Setup
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Existing Supabase project with `connected_conversations` schema
+
+### Installation
+
+1. Clone and install dependencies:
+
+```bash
+npm install
+```
+
+2. Create environment file:
+
+```bash
+cp .env.local.example .env.local
+```
+
+3. Configure environment variables in `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Application Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/login` - Email/password authentication
+- `/app` - Category selection page (protected)
+- `/app/cards` - Question card view (protected)
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+├── app/
+│   ├── (protected)/          # Protected route group
+│   │   ├── page.tsx          # Category selection
+│   │   └── cards/
+│   │       └── page.tsx      # Card view
+│   ├── layout.tsx            # Root layout
+│   └── globals.css           # Global styles
+├── lib/
+│   ├── supabaseClient.ts     # Supabase client + schema
+│   ├── ccService.ts          # Service layer functions
+│   └── types.ts              # TypeScript interfaces
+├── login/
+│   └── page.tsx              # Login page
+└── middleware.ts             # Auth protection middleware
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Key Features Implementation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fisher-Yates Shuffle
+Questions are randomized using the Fisher-Yates shuffle algorithm in `ccService.ts`
 
-## Deploy on Vercel
+### Completion Tracking
+- Questions marked complete are hidden from the deck
+- Upsert pattern ensures one completion record per user/question
+- Uncompleting a question makes it visible again
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Auth Protection
+Middleware guards `/app` and `/app/cards` routes, redirecting unauthenticated users to `/login`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Service Layer Functions
+
+- `getCurrentUserId()` - Get authenticated user ID
+- `getCategories()` - Fetch all categories
+- `getIncompleteQuestions(categoryIds)` - Get shuffled incomplete questions
+- `setQuestionCompletion(questionId, completed)` - Update completion status
+- `signIn(email, password)` - Authenticate user
+- `signOut()` - Sign out current user
+
+## Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Notes
+
+- This is a single-user application (shared account)
+- No CMS or question editor included (v1)
+- RLS policies must be configured in Supabase
+- Mobile-first design optimized for small screens
