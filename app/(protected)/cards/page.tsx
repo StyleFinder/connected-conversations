@@ -72,21 +72,25 @@ export default function CardsPage() {
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
+      console.log('🎰 Starting spin animation');
       setIsSpinning(true);
 
       const cardHeight = 380;
       let offset = 0;
-      let velocity = 50; // Starting velocity in pixels per frame
-      const minVelocity = 0.3;
-      const deceleration = 0.93;
+      let velocity = 60; // Starting velocity - increased for more visible spin
+      const minVelocity = 0.5;
+      const deceleration = 0.92; // Slightly faster deceleration
 
       const spinInterval = setInterval(() => {
         offset += velocity;
         setDisplayOffset(offset);
         velocity *= deceleration;
 
+        console.log(`Spinning - offset: ${offset.toFixed(1)}, velocity: ${velocity.toFixed(2)}`);
+
         if (velocity < minVelocity) {
           clearInterval(spinInterval);
+          console.log('🎯 Spin complete, landing on question');
           setCurrentIndex(currentIndex + 1);
           setIsCompleted(false);
           setIsSpinning(false);
@@ -196,11 +200,20 @@ export default function CardsPage() {
         {/* Question Card with slot machine spin animation */}
         <div className="mb-6 overflow-hidden relative rounded-3xl" style={{ height: '380px' }}>
           <div className="backdrop-blur-xl bg-white/95 shadow-2xl border border-white/20 h-full absolute inset-0"></div>
+
+          {/* Debug info */}
+          {isSpinning && (
+            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-50">
+              Spinning: offset={displayOffset.toFixed(0)}px
+            </div>
+          )}
+
           <div
             className="relative z-10"
             style={{
               transform: `translateY(-${(questions.length * 380) + (currentIndex * 380) + displayOffset}px)`,
               transition: 'none',
+              willChange: 'transform',
             }}
           >
             {/* Create a seamless loop of questions - 3 copies for infinite scroll effect */}
