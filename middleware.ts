@@ -29,18 +29,18 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Protected routes
-  if (req.nextUrl.pathname.startsWith('/app') || req.nextUrl.pathname.startsWith('/cards')) {
+  // Protected routes - root and cards require authentication
+  if (req.nextUrl.pathname === '/' || req.nextUrl.pathname.startsWith('/cards')) {
     if (!session) {
       const redirectUrl = new URL('/login', req.url);
       return NextResponse.redirect(redirectUrl);
     }
   }
 
-  // Redirect to app if already logged in and trying to access login
+  // Redirect to root (category selection) if already logged in and trying to access login
   if (req.nextUrl.pathname === '/login') {
     if (session) {
-      const redirectUrl = new URL('/app', req.url);
+      const redirectUrl = new URL('/', req.url);
       return NextResponse.redirect(redirectUrl);
     }
   }
@@ -49,5 +49,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/cards/:path*', '/login'],
+  matcher: ['/', '/cards/:path*', '/login'],
 };
