@@ -13,7 +13,8 @@ export default function CardsPage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [displayOffset, setDisplayOffset] = useState(0);
+  const [spinningQuestions, setSpinningQuestions] = useState<QuestionWithCategory[]>([]);
+  const [animationKey, setAnimationKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -72,31 +73,30 @@ export default function CardsPage() {
 
   const handleNext = () => {
     if (currentIndex < questions.length - 1) {
-      console.log('🎰 Starting spin animation');
+      // Create array of questions to show during spin
+      const numSpinQuestions = 15;
+      const tempQuestions: QuestionWithCategory[] = [];
+
+      // Fill with random questions for spinning effect
+      for (let i = 0; i < numSpinQuestions; i++) {
+        const randomIdx = Math.floor(Math.random() * questions.length);
+        tempQuestions.push(questions[randomIdx]);
+      }
+
+      // Add the target question at the end
+      tempQuestions.push(questions[currentIndex + 1]);
+
+      setSpinningQuestions(tempQuestions);
       setIsSpinning(true);
+      setAnimationKey(prev => prev + 1);
 
-      const cardHeight = 380;
-      let offset = 0;
-      let velocity = 60; // Starting velocity - increased for more visible spin
-      const minVelocity = 0.5;
-      const deceleration = 0.92; // Slightly faster deceleration
-
-      const spinInterval = setInterval(() => {
-        offset += velocity;
-        setDisplayOffset(offset);
-        velocity *= deceleration;
-
-        console.log(`Spinning - offset: ${offset.toFixed(1)}, velocity: ${velocity.toFixed(2)}`);
-
-        if (velocity < minVelocity) {
-          clearInterval(spinInterval);
-          console.log('🎯 Spin complete, landing on question');
-          setCurrentIndex(currentIndex + 1);
-          setIsCompleted(false);
-          setIsSpinning(false);
-          setDisplayOffset(0); // Reset offset for next spin
-        }
-      }, 16);
+      // After animation completes, update the current index
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1);
+        setIsCompleted(false);
+        setIsSpinning(false);
+        setSpinningQuestions([]);
+      }, 2500); // 2.5 second animation
     }
   };
 
@@ -201,38 +201,44 @@ export default function CardsPage() {
         <div className="mb-6 overflow-hidden relative rounded-3xl" style={{ height: '380px' }}>
           <div className="backdrop-blur-xl bg-white/95 shadow-2xl border border-white/20 h-full absolute inset-0"></div>
 
-          {/* Debug info */}
-          {isSpinning && (
-            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-50">
-              Spinning: offset={displayOffset.toFixed(0)}px
+          {isSpinning ? (
+            // Spinning animation
+            <div
+              key={animationKey}
+              className="relative z-10 slot-machine-spin"
+            >
+              {spinningQuestions.map((q, idx) => (
+                <div
+                  key={`spin-${idx}`}
+                  className="h-[380px] flex items-center justify-center p-8 md:p-12"
+                  style={{
+                    animationDelay: `${idx * 0.15}s`,
+                  }}
+                >
+                  <div className="text-center">
+                    <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                      <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>
+                    <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
+                      {q.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Static current question
+            <div className="relative z-10 h-full flex items-center justify-center p-8 md:p-12">
+              <div className="text-center">
+                <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                </svg>
+                <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
+                  {currentQuestion?.text}
+                </p>
+              </div>
             </div>
           )}
-
-          <div
-            className="relative z-10"
-            style={{
-              transform: `translateY(-${(questions.length * 380) + (currentIndex * 380) + displayOffset}px)`,
-              transition: 'none',
-              willChange: 'transform',
-            }}
-          >
-            {/* Create a seamless loop of questions - 3 copies for infinite scroll effect */}
-            {[...questions, ...questions, ...questions].map((q, idx) => (
-              <div
-                key={`spin-${idx}`}
-                className="h-[380px] flex items-center justify-center p-8 md:p-12"
-              >
-                <div className="text-center">
-                  <svg className="w-12 h-12 text-indigo-400 mx-auto mb-6 opacity-50" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                  </svg>
-                  <p className="text-2xl md:text-3xl text-gray-800 leading-relaxed font-medium">
-                    {q.text}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {error && (
@@ -379,6 +385,17 @@ export default function CardsPage() {
             opacity: 1;
             transform: scale(1);
           }
+        }
+        @keyframes slotSpin {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-6080px); /* 16 cards * 380px */
+          }
+        }
+        .slot-machine-spin {
+          animation: slotSpin 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .animate-gradient-xy {
           animation: gradient-xy 15s ease infinite;
