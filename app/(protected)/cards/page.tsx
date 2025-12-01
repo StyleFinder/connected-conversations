@@ -13,7 +13,7 @@ export default function CardsPage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [spinOffset, setSpinOffset] = useState(0);
+  const [displayOffset, setDisplayOffset] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -74,30 +74,25 @@ export default function CardsPage() {
     if (currentIndex < questions.length - 1) {
       setIsSpinning(true);
 
-      const startOffset = currentIndex * 380; // Current position
-      const targetOffset = (currentIndex + 1) * 380; // Next question position
-      const totalDistance = targetOffset - startOffset + (380 * 8); // Add extra spins for effect
-
-      let traveled = 0;
-      let velocity = 50; // Start fast
-      const minVelocity = 0.5;
-      const deceleration = 0.93; // Deceleration factor
+      const cardHeight = 380;
+      let offset = 0;
+      let velocity = 50; // Starting velocity in pixels per frame
+      const minVelocity = 0.3;
+      const deceleration = 0.93;
 
       const spinInterval = setInterval(() => {
-        traveled += velocity;
-        setSpinOffset(startOffset + traveled);
-
+        offset += velocity;
+        setDisplayOffset(offset);
         velocity *= deceleration;
 
         if (velocity < minVelocity) {
           clearInterval(spinInterval);
-          // Settle on the final question
           setCurrentIndex(currentIndex + 1);
           setIsCompleted(false);
           setIsSpinning(false);
-          setSpinOffset((currentIndex + 1) * 380);
+          setDisplayOffset(0); // Reset offset for next spin
         }
-      }, 16); // ~60fps
+      }, 16);
     }
   };
 
@@ -204,11 +199,11 @@ export default function CardsPage() {
           <div
             className="relative z-10"
             style={{
-              transform: `translateY(-${spinOffset}px)`,
-              transition: isSpinning ? 'none' : 'transform 0.3s ease-out',
+              transform: `translateY(-${(questions.length * 380) + (currentIndex * 380) + displayOffset}px)`,
+              transition: 'none',
             }}
           >
-            {/* Create a seamless loop of questions */}
+            {/* Create a seamless loop of questions - 3 copies for infinite scroll effect */}
             {[...questions, ...questions, ...questions].map((q, idx) => (
               <div
                 key={`spin-${idx}`}
