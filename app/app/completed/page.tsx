@@ -41,6 +41,9 @@ export default function CompletedQuestionsPage() {
         category_id: q.category_id,
         category_name: q.categories?.name || 'Unknown',
         is_completed: q.is_completed,
+        is_active: true,
+        created_at: q.created_at || new Date().toISOString(),
+        updated_at: q.updated_at || new Date().toISOString(),
       }));
 
       setQuestions(formattedQuestions);
