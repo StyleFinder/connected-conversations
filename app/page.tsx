@@ -107,7 +107,7 @@ export default function CategorySelectionPage() {
         {/* Header */}
         <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
           <h1 className="text-[#003366] font-bold" style={{ fontSize: '32px' }}>
-            Connected Conversations
+            Connected Conversations for Jim and Michele
           </h1>
           <button
             onClick={handleSignOut}
