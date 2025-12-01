@@ -25,4 +25,5 @@ export interface QuestionCompletion {
 
 export interface QuestionWithCategory extends Question {
   category_name: string;
+  is_completed?: boolean;
 }
